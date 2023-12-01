@@ -124,6 +124,7 @@ router.post('/register', async (req, res) => {
     try {
         // Generate an account number
         const accountNumber = generateAccountNumber();
+
         // Create a new user with the generated account number
         let user = new User({
             fullname: req.body.fullname,
@@ -134,18 +135,28 @@ router.post('/register', async (req, res) => {
             secretAnswer: req.body.secretAnswer,
             accountNumber: accountNumber,
         });
+
         // Save the user to the database
         user = await user.save();
+
         if (!user) {
             return res.status(400).send('The user cannot be created!');
         }
+
+        // Log for debugging
+        console.log("Email:", req.body.email);
+        console.log("Account Number:", accountNumber);
+
         // Pass the email to the function
         sendAccountToEmail(req.body.email, accountNumber);
+
         res.send(user);
     } catch (error) {
+        console.error("Error in registration:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
 
 function sendAccountToEmail(email, accountNumber) {
     const transporter = nodemailer.createTransport({
