@@ -148,7 +148,7 @@ router.post('/register', async (req, res) => {
         console.log("Account Number:", accountNumber);
 
         // Pass the email to the function
-        sendAccountToEmail(req.body.email, accountNumber);
+        sendAccountToEmail(email, accountNumber);
 
         res.send(user);
     } catch (error) {
