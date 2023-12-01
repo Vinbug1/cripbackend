@@ -70,7 +70,8 @@ router.post('/login', async (req,res) => {
         )
        
         res.status(200).send({
-          user: user.email ,
+            email: user.email,
+          username: user.username, 
            token: token,
            userId: user.id,
           name: user.name,
@@ -90,11 +91,39 @@ function generateAccountNumber() {
     return Math.floor(1000000000 + Math.random() * 9000000000).toString(); // Example: 10-digit account number
 }
 
+// router.post('/register', async (req, res) => {
+//     try {
+//         // Generate an account number
+//         const accountNumber = generateAccountNumber();
+
+//         // Create a new user with the generated account number
+//         let user = new User({
+//             fullname: req.body.fullname,
+//             username: req.body.username,
+//             email: req.body.email,
+//             passwordHash: bcrypt.hashSync(req.body.password, 10),
+//             secretQuestion: req.body.secretQuestion,
+//             secretAnswer: req.body.secretAnswer,
+//             accountNumber: accountNumber,
+//         });
+
+//         // Save the user to the database
+//         user = await user.save();
+
+//         if (!user) {
+//             return res.status(400).send('The user cannot be created!');
+//         }
+//         sendAccountToEmail(email, accountNumber); // You need to implement this function
+//         res.send(user);
+//     } catch (error) {
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
+
 router.post('/register', async (req, res) => {
     try {
         // Generate an account number
         const accountNumber = generateAccountNumber();
-
         // Create a new user with the generated account number
         let user = new User({
             fullname: req.body.fullname,
@@ -103,16 +132,15 @@ router.post('/register', async (req, res) => {
             passwordHash: bcrypt.hashSync(req.body.password, 10),
             secretQuestion: req.body.secretQuestion,
             secretAnswer: req.body.secretAnswer,
-            accountNumber: accountNumber,
+            //accountNumber: accountNumber,
         });
-
         // Save the user to the database
         user = await user.save();
-
         if (!user) {
             return res.status(400).send('The user cannot be created!');
         }
-        sendAccountToEmail(email, accountNumber); // You need to implement this function
+        // Pass the email to the function
+        sendAccountToEmail(req.body.email, accountNumber);
         res.send(user);
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
