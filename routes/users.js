@@ -132,7 +132,7 @@ router.post('/register', async (req, res) => {
             passwordHash: bcrypt.hashSync(req.body.password, 10),
             secretQuestion: req.body.secretQuestion,
             secretAnswer: req.body.secretAnswer,
-            //accountNumber: accountNumber,
+            accountNumber: accountNumber,
         });
         // Save the user to the database
         user = await user.save();
