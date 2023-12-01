@@ -41,7 +41,7 @@ router.put('/:id',async (req, res)=> {
             name: req.body.name,
             email: req.body.email,
             passwordHash: newPassword,
-            phone: req.body.phone,
+            accountNumber: req.body.accountNumber,
         },
         { new: true}
     )
@@ -75,6 +75,7 @@ router.post('/login', async (req,res) => {
            userId: user.id,
           name: user.name,
           phone: user.phone,
+          accountNumber: user.accountNumber,
           coins: user.coins || 0,
           }) 
     } else {
@@ -96,10 +97,12 @@ router.post('/register', async (req, res) => {
 
         // Create a new user with the generated account number
         let user = new User({
-            name: req.body.name,
+            fullname: req.body.fullname,
+            username: req.body.username,
             email: req.body.email,
             passwordHash: bcrypt.hashSync(req.body.password, 10),
-            phone: req.body.phone,
+            secretQuestion: req.body.secretQuestion,
+            secretAnswer: req.body.secretAnswer,
             accountNumber: accountNumber,
         });
 
