@@ -119,9 +119,13 @@ function generateAccountNumber() {
 //         res.status(500).json({ success: false, error: error.message });
 //     }
 // });
-
 router.post('/register', async (req, res) => {
     try {
+        // Check if password is present
+        if (!req.body.password) {
+            return res.status(400).send('Password is required.');
+        }
+
         // Generate an account number
         const accountNumber = generateAccountNumber();
 
@@ -148,7 +152,7 @@ router.post('/register', async (req, res) => {
         console.log("Account Number:", accountNumber);
 
         // Pass the email to the function
-        sendAccountToEmail(email, accountNumber);
+        sendAccountToEmail(req.body.email, accountNumber);
 
         res.send(user);
     } catch (error) {
@@ -156,6 +160,7 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
 
 
 function sendAccountToEmail(email, accountNumber) {
