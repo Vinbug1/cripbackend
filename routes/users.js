@@ -164,17 +164,27 @@ router.post('/register', async (req, res) => {
 
 
 function sendAccountToEmail(email, accountNumber) {
+    // const transporter = nodemailer.createTransport({
+    //     //host: "smtp-mail.outlook.com", // Outlook SMTP server
+    //     //port: 587, // Port for sending emails
+    //     host: 'smtp.mail.yahoo.com',
+    //     port: 465, // Port for sending emails
+    //   secure: false,
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASSWORD,
+    //   },
+    // });
     const transporter = nodemailer.createTransport({
-        //host: "smtp-mail.outlook.com", // Outlook SMTP server
-        //port: 587, // Port for sending emails
         host: 'smtp.mail.yahoo.com',
-        port: 465, // Port for sending emails
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
+        port: 465,
+        secure: false,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD,
+        },
     });
+    
   
     const mailOptions = {
       from: process.env.EMAIL_USER,
