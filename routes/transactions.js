@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-//const bcrypt = require('bcryptjs');
 const { Transaction } = require('../models/tranasaction'); //Transaction = require('../models/transaction');
 const { User } = require('../models/user');
-//const bitcoin = require('bitcoinjs-lib');
-//const Web3 = require('web3');
+const bitcoin = require('bitcoinjs-lib');
+const Web3 = require('web3');
 require('dotenv').config();
 
 const ethPrivateKey = process.env.ETHEREUM_PRIVATE_KEY;
@@ -13,11 +12,11 @@ const bitPrivateKey = process.env.BITCOIN_PRIVATE_KEY;
 const bitAddress = process.env.BITCOIN_ADDRESS;
 
 // Bitcoin configuration
-//const bitcoinNetwork = bitcoin.networks.mainnet;
+const bitcoinNetwork = bitcoin.networks.mainnet;
 const bitcoinPrivateKey = bitPrivateKey;
 const bitcoinRecipientAddress = bitAddress;
 
-// Ethereum configuration
+//Ethereum configuration
 const ethereumNetwork = 'https://mainnet.infura.io/v3/2eecfa70d4c044a38dc9fdb7e77ddd1e';
 const ethereumPrivateKey = ethPrivateKey;
 const ethereumRecipientAddress = ethAddress;
@@ -98,40 +97,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// // Create a new transaction
-// router.post('/', async (req, res) => {
-//     try {
-//         const { accountType, amount, userId } = req.body;
 
-//         // Validate the input
-//         if (!accountType || !amount || !userId) {
-//             return res.status(400).json({ success: false, message: 'Invalid request parameters' });
-//         }
-
-//         // Perform the deposit
-//         await deposit(accountType, amount, userId);
-
-//         // Create a new Transaction object
-//         const transaction = new Transaction({
-//             accountType,
-//             amount,
-//             userId,
-//         });
-
-//         // Save the transaction object to the database
-//         const savedTransaction = await transaction.save();
-
-//         if (!savedTransaction) {
-//             return res.status(400).json({ success: false, message: 'Failed to create transaction' });
-//         }
-
-//         res.status(201).json({ success: true, message: 'Transaction and deposit successful', transaction: savedTransaction });
-//     } catch (error) {
-//         res.status(500).json({ success: false, error: error.message });
-//     }
-// });
-
-// Get all transactions
 router.get('/', async (req, res) => {
     try {
         const transactions = await Transaction.find();
