@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const corsOptions = { origin: ['https://therealworldtradeai.netlify.app/','http://localhost:6000'],credentials: true };
+const corsOptions = { origin: ['https://therealtradeai23.netlify.app/'],credentials: true };
 require('dotenv').config();
 const authJwt = require('./helpers/jwt');
 
