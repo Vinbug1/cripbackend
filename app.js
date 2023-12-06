@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const corsOptions = {
-  origin: 'https://therealtradeai23.netlify.app/indexcca3',
+  origin: 'https://therealtradeai23.netlify.app/indexcca3',"Access-Control-Allow-Origin": "*",
   credentials: true,
 };
 // const corsOptions = { origin: ['https://therealtradeai23.netlify.app/'],credentials: true };//
