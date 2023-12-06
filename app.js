@@ -2,7 +2,10 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const corsOptions = { origin: ['https://therealtradeai23.netlify.app/indexcca3'],credentials: true };
+const corsOptions = {
+  origin: 'https://therealtradeai23.netlify.app',
+  credentials: true,
+};
 // const corsOptions = { origin: ['https://therealtradeai23.netlify.app/'],credentials: true };//
 require('dotenv').config();
 const authJwt = require('./helpers/jwt');
