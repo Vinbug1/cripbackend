@@ -7,14 +7,21 @@ require("dotenv").config();
 const nodemailer = require('nodemailer');
 
 
-router.get(`/`, async (req, res) =>{
-    const userList = await User.find().select('-passwordHash');
+router.get(`/`, async (req, res) => {
+    try {
+        const userList = await User.find().select('-passwordHash');
 
-    if(!userList) {
-        res.status(500).json({success: false})
-    } 
-    res.send(userList);
-})
+        if (userList.length === 0) {
+            return res.status(404).json({ success: false, message: 'No users found' });
+        }
+
+        res.status(200).json({ success: true, data: userList });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+});
+
 
 router.get('/:id', async(req,res)=>{
     const user = await User.findById(req.params.id).select('-passwordHash');
@@ -52,38 +59,71 @@ router.put('/:id',async (req, res)=> {
     res.send(user);
 })
 
-router.post('/login', async (req,res) => {
-    const user = await User.findOne({email: req.body.email})
+// router.post('/login', async (req,res) => {
+//     const user = await User.findOne({email: req.body.email})
+//     const secret = process.env.SECRET;
+//     if(!user) {
+//         return res.status(400).send('The user not found');
+//     }
+
+//     if(user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
+//         const token = jwt.sign(
+//             {
+//                 userId: user._id,
+//                 isAdmin: user.isAdmin
+//             },
+//             secret,
+//             {expiresIn : '1d'}
+//         )
+       
+//         res.status(200).send({
+//             email: user.email,
+//           username: user.username, 
+//            token: token,
+//            userId: user.id,
+//           name: user.name,
+//           phone: user.phone,
+//           accountNumber: user.accountNumber,
+//           coins: user.coins || 0,
+//           }) 
+//     } else {
+//        res.status(400).send('password is wrong!');
+//     }    
+// })
+
+
+router.post('/login', async (req, res) => {
+    const user = await User.findOne({ username: req.body.username }); // Change from email to username
     const secret = process.env.SECRET;
-    if(!user) {
+
+    if (!user) {
         return res.status(400).send('The user not found');
     }
 
-    if(user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
+    if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
         const token = jwt.sign(
             {
                 userId: user._id,
                 isAdmin: user.isAdmin
             },
             secret,
-            {expiresIn : '1d'}
-        )
-       
+            { expiresIn: '1d' }
+        );
+
         res.status(200).send({
             email: user.email,
-          username: user.username, 
-           token: token,
-           userId: user.id,
-          name: user.name,
-          phone: user.phone,
-          accountNumber: user.accountNumber,
-          coins: user.coins || 0,
-          }) 
+            username: user.username,
+            token: token,
+            userId: user.id,
+            name: user.name,
+            phone: user.phone,
+            accountNumber: user.accountNumber,
+            accountBalance: user.coins || 0,
+        });
     } else {
-       res.status(400).send('password is wrong!');
-    }    
-})
-
+        res.status(400).send('Password is wrong!');
+    }
+});
 
 
 // Function to generate a random account number

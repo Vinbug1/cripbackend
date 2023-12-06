@@ -28,8 +28,8 @@ app.use(errorHandler);
 
 // Database Connection
 const dbOptions = {
-  //useNewUrlParser: true,
-  //useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
   dbName: 'coin-db',
 };
 
