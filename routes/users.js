@@ -159,8 +159,11 @@ router.post('/register', async (req, res) => {
         console.log("Email:", req.body.email);
         console.log("Account Number:", accountNumber);
 
-        // Pass the email to the function
-        sendAccountToEmail(req.body.email, accountNumber, res); // Pass res to the function
+        // Set a custom response header for successful registration
+        res.header('Registration-Successful', 'true');
+
+        // Respond with a 200 status code
+        res.status(200).json({ success: true, message: 'Registration successful' });
     } catch (error) {
         console.error("Error in registration:", error);
         res.status(500).json({ success: false, error: error.message });
