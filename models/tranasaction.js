@@ -1,34 +1,21 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-  
-  accountNumber: {
-    type: String,
-    required: true,
-  },
-  accountType:{
-    type: String,
-    required: true,
-  },
-  amount:{
-    type: String,
-    required: true,
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-},
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    profit: {
+        type: String,
+        required: true,
+    },
+    coin:{
+        type: String,
+        required: true,
+    }
 });
 
-transactionSchema.virtual("id").get(function () {
-  return this._id.toHexString();
-});
+const Transaction = mongoose.model('Transaction', transactionSchema);
 
-transactionSchema.set("toJSON", {
-  virtuals: true,
-});
-
-exports.Transaction = mongoose.model("Transaction", transactionSchema);
-exports.transactionSchema = transactionSchema;
-
+module.exports = Transaction;
