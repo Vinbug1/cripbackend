@@ -24,6 +24,7 @@ app.use(authJwt());
 
 // Routes
 app.use(`${api}/transactions`, require('./routes/transactions'));
+app.use(`${api}/funcImgs`, require('./routes/funcImgs'));
 app.use(`${api}/users`, require('./routes/users'));
 
 // Error handling middleware should be applied last
