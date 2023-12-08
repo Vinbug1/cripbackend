@@ -63,6 +63,91 @@ router.get('/transactions/:id', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+// Get all transactions with user details
+router.get('/all', async (req, res) => {
+    try {
+        // Find all transactions and populate the 'user' field with user details
+        const transactions = await Transaction.find().populate('user');
+
+        if (!transactions || transactions.length === 0) {
+            return res.status(404).json({ error: 'No transactions found' });
+        }
+
+        res.status(200).json(transactions);
+    } catch (error) {
+        console.error('Error fetching all transactions:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get all transactions for a specific user with specific user details
+router.get('/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // Find all transactions for the specified user ID and populate specific fields from the 'user' model
+        const transactions = await Transaction.find({ user: userId }).populate({
+            path: 'user',
+            select: 'fullname email date', // Include the specific fields you want
+        });
+
+        if (!transactions || transactions.length === 0) {
+            return res.status(404).json({ error: 'Transactions not found for the user' });
+        }
+
+        res.status(200).json(transactions);
+    } catch (error) {
+        console.error('Error fetching transactions for user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Withdrawal endpoint
+router.post('/withdrawal', async (req, res) => {
+    try {
+        const { userId, amount } = req.body;
+
+        // Fetch the user by ID
+        const existingUser = await User.findById(userId);
+
+        if (!existingUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Check if the user has sufficient funds for withdrawal
+        if (existingUser.coin < amount) {
+            return res.status(400).json({ error: 'Insufficient funds for withdrawal' });
+        }
+
+        // Create a new withdrawal transaction
+        const withdrawalTransaction = new Transaction({
+            user: userId,
+            profit: -amount, // Assuming a negative amount represents a withdrawal
+            coin: 0, // Set to 0 for withdrawals, adjust accordingly based on your logic
+        });
+
+        // Save the withdrawal transaction
+        const savedWithdrawalTransaction = await withdrawalTransaction.save();
+
+        // Update the user's coin balance
+        existingUser.coin -= amount;
+        const updatedUser = await existingUser.save();
+
+        // Respond with a success message and information about the withdrawal
+        res.status(200).json({
+            message: 'Withdrawal request successful',
+            details: 'Your withdrawal will be processed within 3 working days. If you have any questions, please contact the admin at 12345678.',
+            user: updatedUser,
+            transaction: savedWithdrawalTransaction,
+        });
+    } catch (error) {
+        console.error('Error processing withdrawal:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+
 
 // Update a transaction by ID
 router.put('/transactions/:id', async (req, res) => {
