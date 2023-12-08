@@ -4,7 +4,6 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
-const nodemailer = require('nodemailer');
 
 // Middleware to check if the user is an admin
 const isAdmin = (req, res, next) => {

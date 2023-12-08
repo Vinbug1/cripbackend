@@ -20,7 +20,7 @@ router.post('/transactions', async (req, res) => {
 });
 
 // Get all transactions
-app.get('/address', (req, res) => {
+router.get('/address', (req, res) => {
     try {
         const walletAddresses = getWalletAddresses();
         res.status(200).json(walletAddresses);
