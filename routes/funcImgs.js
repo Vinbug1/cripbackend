@@ -3,90 +3,78 @@ const router = express.Router();
 const admin = require('firebase-admin');
 const multer = require('multer');
 const path = require('path');
-const { FuncImg } = require('../models/funcImg');
-const User = require('../models/user');
-
-// Initialize Firebase Admin SDK
-admin.initializeApp({
-    // Your Firebase Admin SDK configuration here...
-});
-
-// Reference to Firebase Storage
-const storage = admin.storage();
-const bucket = storage.bucket();
-
-// Multer configuration for handling image uploads
-const storageConfig = multer.memoryStorage();
-const upload = multer({ storage: storageConfig });
+const  FuncImg  = require('../models/funcImg');
+const { Storage } = require('@google-cloud/storage');
+ 
+const storage = new Storage({
+    projectId: 'imagekeep-ac687  ', // Replace with your Google Cloud project ID
+    keyFilename: './imagekeep-ac687-firebase-adminsdk-t6lga-032cb2bd96.json', // Replace with your service account key file path
+  });
+  
+  // Set up Multer for handling file uploads
+  const multerStorage = multer.memoryStorage();
+  const upload = multer({ storage: multerStorage });
 
 // Upload an image
 router.post('/upload-image', upload.single('image'), async (req, res) => {
     try {
-        const { user } = req.body;
-        const imageBuffer = req.file.buffer;
+      // Initialize Firebase Admin inside the route handler
+    const admin = require('firebase-admin');
+    const serviceAccount = require('./imagekeep-ac687-firebase-adminsdk-t6lga-032cb2bd96.json');
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      storageBucket: 'gs://imagekeep-ac687.appspot.com', // Replace with your actual Firebase Storage bucket URL
+    });
 
-        // Generate a unique filename based on the original filename
-        const filename = `${Date.now()}_${path.basename(req.file.originalname)}`;
-        const file = bucket.file(filename);
+    const bucket = admin.storage().bucket(); // Define bucket here
 
-        // Create a write stream to upload the image to Firebase Storage
-        const fileStream = file.createWriteStream({
-            metadata: {
-                contentType: req.file.mimetype,
-            },
-        });
+    // Upload the image to Firebase Storage
+    const imageBuffer = req.file.buffer;
+    const uniqueFileName = `${Date.now()}-${req.file.originalname}`;
+    const file = bucket.file(uniqueFileName);
+    const fileStream = file.createWriteStream();
 
-        fileStream.on('error', (error) => {
-            console.error('Error uploading image:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        });
+    fileStream.on('error', (err) => {
+      console.error(err);
+      res.status(500).json({ message: 'Error uploading image' });
+    });
 
-        fileStream.on('finish', async () => {
-            // Save the image information to the database
-            const funcImg = new FuncImg({
-                user: user,
-                image: filename,
-            });
+    fileStream.on('finish', async () => {
+      // Save the image path to MongoDB
+      const imagePath = `gs://${bucket.name}/${uniqueFileName}`;
+      const newImage = new FuncImg({ path: imagePath });
+      await newImage.save();
+      res.status(200).json({ message: 'Image uploaded successfully' });
+    });
 
-            await funcImg.save();
-
-            res.status(200).json({ message: 'Image uploaded successfully' });
-        });
-
-        fileStream.end(imageBuffer);
-    } catch (error) {
-        console.error('Error uploading image:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    fileStream.end(imageBuffer);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error uploading image' });
+  }
 });
 
 // Download an image
-router.get('/download-image/:id', async (req, res) => {
-    try {
-        const funcImg = await FuncImg.findById(req.params.id);
-
-        if (!funcImg) {
-            return res.status(404).json({ error: 'Image not found' });
-        }
-
-        const filename = funcImg.image;
-        const file = bucket.file(filename);
-        const fileStream = file.createReadStream();
-
-        // Set response headers for image download
-        res.setHeader('Content-Type', 'image/*');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-        fileStream.on('error', (error) => {
-            console.error('Error downloading image:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        });
-
-        fileStream.pipe(res);
-    } catch (error) {
-        console.error('Error downloading image:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+router.get('/getImages', async (req, res) => {
+    try{
+    const images = await FuncImg.find({}, 'path'); // Retrieve only the 'path' field
+    const imageUrls = await Promise.all(images.map(async (image) => {
+      const gcsPath = image.path.replace(/^gs:\/\/(.*?)\//, ''); // Remove 'gs://' prefix and up to the first '/'
+      console.log('gcsPath:', gcsPath); // Log the gcsPath for debugging
+      const [publicUrl] = await storage.bucket('imagekeep-ac687.appspot.com').file(gcsPath).getSignedUrl({
+        action: 'read',
+       // expires: Date.now() + 24 * 60 * 60 * 1000, // URL expires in 24 hours
+      });
+      console.log('publicUrl:', publicUrl); // Log the publicUrl for debugging
+      return publicUrl;
+    }));
+    
+    res.json({ images: imageUrls });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching images' });
+  }
 });
 
 // Get all users with their images
@@ -122,6 +110,9 @@ router.get('/get-all-users-with-images', async (req, res) => {
     }
 });
 
+// The rest of your existing code...
+
+module.exports = router;
 
 
 // The rest of your existing code...

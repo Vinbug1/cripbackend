@@ -16,8 +16,11 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-jwt": "^8.4.1",
+    "firebase-admin": "^12.0.0",
+    "firebase-storage": "^1.0.0",
     "mongoose": "^8.0.1",
     "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "nodemon": "^3.0.1"
   },
   "devDependencies": {
