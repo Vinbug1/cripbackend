@@ -5,7 +5,7 @@ const  Transaction  = require('../models/tranasaction');
 
 
 // Create a new transaction
-router.post('/transactions', async (req, res) => {
+router.post('/trans', async (req, res) => {
     try {
         const { user, coin, profit } = req.body;
 
