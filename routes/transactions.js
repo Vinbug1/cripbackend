@@ -9,15 +9,31 @@ router.post('/transactions', async (req, res) => {
     try {
         const { user, coin, profit } = req.body;
 
-        const newTransaction = new Transaction({ user,profit,coin });
+        // Fetch the user by ID
+        const existingUser = await User.findById(user);
+
+        if (!existingUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Update the user's coin and profit
+        existingUser.coin += coin;
+        existingUser.profit += profit;
+
+        // Save the updated user
+        const updatedUser = await existingUser.save();
+
+        // Create a new transaction
+        const newTransaction = new Transaction({ user, profit, coin });
         const savedTransaction = await newTransaction.save();
 
-        res.status(200).json(savedTransaction);
+        res.status(200).json({ user: updatedUser, transaction: savedTransaction });
     } catch (error) {
         console.error('Error creating transaction:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 // Get all transactions
 router.get('/address', (req, res) => {
