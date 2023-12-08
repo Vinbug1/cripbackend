@@ -7,11 +7,11 @@ const transactionSchema = new mongoose.Schema({
         required: true,
     },
     profit: {
-        type: String,
+        type: Number,
         required: true,
     },
     coin:{
-        type: String,
+        type: Number,
         required: true,
     }
 });

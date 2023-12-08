@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const  Transaction  = require('../models/tranasaction');
-const  User = require('../models/user');
+const  {User} = require('../models/user');
 
 
+// Create a new transaction
 // Create a new transaction
 router.post('/trans', async (req, res) => {
     try {
