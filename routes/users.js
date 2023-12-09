@@ -1,4 +1,5 @@
 const { User } = require('../models/user');
+const Transaction = require('../models/transaction');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -143,8 +144,6 @@ router.put('/edit-coins-profit/:userId', async (req, res) => {
     }
 });
 
-
-
 router.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ username: req.body.username });
@@ -167,10 +166,13 @@ router.post('/login', async (req, res) => {
             // Update last login time
             user.last_login_time = new Date();
 
+            // Fetch user's transaction history
+            const userTransactions = await Transaction.find({ username: user.username });
+
             // Save the updated user data to the database
             await user.save();
 
-            // Respond with a 200 status code and the user data
+            // Respond with a 200 status code and the user data including transactions
             res.status(200).json({
                 email: user.email,
                 username: user.username,
@@ -181,6 +183,7 @@ router.post('/login', async (req, res) => {
                 accountNumber: user.accountNumber,
                 accountBalance: user.coins || 0,
                 profit: user.profit || 0,
+                transactions: userTransactions,
             });
         } else {
             res.status(400).json({ success: false, message: 'Password is wrong!' });
@@ -190,6 +193,104 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
+
+// router.post('/login', async (req, res) => {
+//     try {
+//         const user = await User.findOne({ username: req.body.username });
+//         const secret = process.env.SECRET;
+
+//         if (!user) {
+//             return res.status(400).json({ success: false, message: 'The user not found' });
+//         }
+
+//         if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
+//             const token = jwt.sign(
+//                 {
+//                     userId: user._id,
+//                     isAdmin: user.isAdmin
+//                 },
+//                 secret,
+//                 { expiresIn: '1d' }
+//             );
+
+//             // Update last login time
+//             user.last_login_time = new Date();
+
+//             // Save the updated user data to the database
+//             await user.save();
+
+//             // Fetch user transactions
+//             const userTransactions = await Transaction.find({ username: user.username });
+
+//             // Respond with a 200 status code and the user data along with transactions
+//             res.status(200).json({
+//                 email: user.email,
+//                 username: user.username,
+//                 token: token,
+//                 userId: user.id,
+//                 name: user.name,
+//                 phone: user.phone,
+//                 accountNumber: user.accountNumber,
+//                 accountBalance: user.coins || 0,
+//                 profit: user.profit || 0,
+//                 transactions: userTransactions || [],
+//             });
+//         } else {
+//             res.status(400).json({ success: false, message: 'Password is wrong!' });
+//         }
+//     } catch (error) {
+//         console.error('Error in login:', error);
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
+
+
+// router.post('/login', async (req, res) => {
+//     try {
+//         const user = await User.findOne({ username: req.body.username });
+//         const secret = process.env.SECRET;
+
+//         if (!user) {
+//             return res.status(400).json({ success: false, message: 'The user not found' });
+//         }
+
+//         if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
+//             const token = jwt.sign(
+//                 {
+//                     userId: user._id,
+//                     isAdmin: user.isAdmin
+//                 },
+//                 secret,
+//                 { expiresIn: '1d' }
+//             );
+
+//             // Update last login time
+//             user.last_login_time = new Date();
+
+//             // Save the updated user data to the database
+//             await user.save();
+
+//             // Respond with a 200 status code and the user data
+//             res.status(200).json({
+//                 email: user.email,
+//                 username: user.username,
+//                 token: token,
+//                 userId: user.id,
+//                 name: user.name,
+//                 phone: user.phone,
+//                 accountNumber: user.accountNumber,
+//                 accountBalance: user.coins || 0,
+//                 profit: user.profit || 0,
+//             });
+//         } else {
+//             res.status(400).json({ success: false, message: 'Password is wrong!' });
+//         }
+//     } catch (error) {
+//         console.error('Error in login:', error);
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
 
 // Route for user registration
 router.post('/register', async (req, res) => {
