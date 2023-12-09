@@ -174,6 +174,7 @@ router.post('/login', async (req, res) => {
 
             // Respond with a 200 status code and the user data including transactions
             res.status(200).json({
+                fullname: user.fullname,
                 email: user.email,
                 username: user.username,
                 token: token,
