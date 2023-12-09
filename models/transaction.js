@@ -1,17 +1,20 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+    username: {
+        type: String,
         required: true,
     },
     profit: {
         type: Number,
         required: true,
     },
-    coin:{
+    amount:{
         type: Number,
+        required: true,
+    },
+    account:{
+        type: String,
         required: true,
     }
 });
