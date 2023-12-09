@@ -7,7 +7,7 @@ const {User} = require('../models/user');
 // Create a new transaction
 router.post('/trans', async (req, res) => {
     try {
-        const { username, profit, amount, account } = req.body;
+        const { username, profit, amount, account, type} = req.body;
 
         // Fetch the user by username
         const existingUser = await User.findOne({ username });
@@ -24,7 +24,7 @@ router.post('/trans', async (req, res) => {
         const updatedUser = await existingUser.save();
 
         // Create a new transaction
-        const newTransaction = new Transaction({ username, profit, amount, account });
+        const newTransaction = new Transaction({ username, profit, amount, account,type });
         const savedTransaction = await newTransaction.save();
 
         res.status(200).json({ user: updatedUser, transaction: savedTransaction });
