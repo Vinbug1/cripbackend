@@ -29,10 +29,27 @@ router.get('/all-users', async (req, res) => {
 });
 
 
-// Route to get a specific user by ID (protected for admins)
-router.get('/get-user/:userId', async (req, res) => {
+// // Route to get a specific user by ID (protected for admins)
+// router.get('/get-user/:userId', async (req, res) => {
+//     try {
+//         const user = await User.findById(req.params.userId).select('-passwordHash');
+
+//         if (!user) {
+//             return res.status(404).json({ success: false, message: 'User not found' });
+//         }
+
+//         res.status(200).json({ success: true, data: user });
+//     } catch (error) {
+//         console.error('Error fetching user:', error);
+//         res.status(500).json({ success: false, error: 'Internal Server Error' });
+//     }
+// });
+
+// Route to get a specific user by username (protected for admins)
+router.get('/get-user/:username', async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId).select('-passwordHash');
+        // Assuming you have a unique index on the 'username' field
+        const user = await User.findOne({ username: req.params.username }).select('-passwordHash');
 
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
@@ -45,55 +62,63 @@ router.get('/get-user/:userId', async (req, res) => {
     }
 });
 
-// Function to manually add coins and profit to a user
-router.post('/add-coins-profit/:userId', async (req, res) => {
-    try {
-        // // Check if the request is coming from an admin (you can customize this check based on your authentication logic)
-        // const isAdmin = req.headers['admin-auth-token'] === process.env.ADMIN_AUTH_TOKEN;
 
-        // if (!isAdmin) {
-        //     return res.status(403).json({ success: false, message: 'Unauthorized access' });
-        // }
+                                
 
-        const userId = req.params.userId;
-        const user = await User.findById(userId);
+// // Function to manually edit and reduce coins and profit of a user
+// router.put('/edit-coins-profit/:userId', async (req, res) => {
+//     try {
+//         // Check if the request is coming from an admin (you can customize this check based on your authentication logic)
+//         const isAdmin = req.headers['admin-auth-token'] === process.env.ADMIN_AUTH_TOKEN;
 
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
+//         if (!isAdmin) {
+//             return res.status(403).json({ success: false, message: 'Unauthorized access' });
+//         }
 
-        const { coinsToAdd, profitToAdd } = req.body;
+//         const userId = req.params.userId;
+//         const user = await User.findById(userId);
 
-        // Validate that coinsToAdd and profitToAdd are numbers
-        if (isNaN(coinsToAdd) || isNaN(profitToAdd)) {
-            return res.status(400).json({ success: false, message: 'Invalid input. Coins and profit must be numbers.' });
-        }
+//         if (!user) {
+//             return res.status(404).json({ success: false, message: 'User not found' });
+//         }
 
-        // Add coins and profit to the user
-        user.coins += parseInt(coinsToAdd);
-        user.profit += parseInt(profitToAdd);
+//         const { coinsToEdit, profitToEdit } = req.body;
 
-        // Save the updated user data to the database
-        await user.save();
+//         // Validate that coinsToEdit and profitToEdit are numbers
+//         if (isNaN(coinsToEdit) || isNaN(profitToEdit)) {
+//             return res.status(400).json({ success: false, message: 'Invalid input. Coins and profit must be numbers.' });
+//         }
 
-        res.status(200).json({
-            success: true,
-            message: 'Coins and profit added successfully',
-            updatedUser: {
-                email: user.email,
-                username: user.username,
-                accountBalance: user.coins || 0,
-                profit: user.profit || 0,
-            },
-        });
-    } catch (error) {
-        console.error('Error adding coins and profit:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
+//         // Ensure that the admin does not reduce coins or profit below zero
+//         if (user.coins - coinsToEdit < 0 || user.profit - profitToEdit < 0) {
+//             return res.status(400).json({ success: false, message: 'Coins or profit cannot be reduced below zero.' });
+//         }
 
-// Function to manually edit and reduce coins and profit of a user
-router.put('/edit-coins-profit/:userId', async (req, res) => {
+//         // Edit and reduce coins and profit of the user
+//         user.coins -= parseInt(coinsToEdit);
+//         user.profit -= parseInt(profitToEdit);
+
+//         // Save the updated user data to the database
+//         await user.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Coins and profit edited successfully',
+//             updatedUser: {
+//                 email: user.email,
+//                 username: user.username,
+//                 accountBalance: user.coins || 0,
+//                 profit: user.profit || 0,
+//             },
+//         });
+//     } catch (error) {
+//         console.error('Error editing coins and profit:', error);
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
+
+// Function to manually edit and reduce coins and profit of a user by username (protected for admins)
+router.put('/edit-coins-profit/:username', async (req, res) => {
     try {
         // Check if the request is coming from an admin (you can customize this check based on your authentication logic)
         const isAdmin = req.headers['admin-auth-token'] === process.env.ADMIN_AUTH_TOKEN;
@@ -102,8 +127,8 @@ router.put('/edit-coins-profit/:userId', async (req, res) => {
             return res.status(403).json({ success: false, message: 'Unauthorized access' });
         }
 
-        const userId = req.params.userId;
-        const user = await User.findById(userId);
+        const username = req.params.username;
+        const user = await User.findOne({ username });
 
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
@@ -144,6 +169,7 @@ router.put('/edit-coins-profit/:userId', async (req, res) => {
     }
 });
 
+
 router.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ username: req.body.username });
@@ -182,7 +208,7 @@ router.post('/login', async (req, res) => {
                 name: user.name,
                 phone: user.phone,
                 accountNumber: user.accountNumber,
-                accountBalance: user.coins || 0,
+                accountBalance: user.accountBalance || 0,
                 profit: user.profit || 0,
                 transactions: userTransactions,
             });
@@ -196,11 +222,12 @@ router.post('/login', async (req, res) => {
 });
 
 
+const generateSuggestedUsername = (baseUsername, suffix) => {
+    return `${baseUsername}_${suffix}`;
+};
 
 router.post('/register', async (req, res) => {
     try {
-
-        // Create a new user
         const {
             fullname,
             username,
@@ -209,13 +236,35 @@ router.post('/register', async (req, res) => {
             secretQuestion,
             secretAnswer,
             accountType,
-         } = req.body;
+        } = req.body;
+
         // Check if password is present
         if (!req.body.password) {
             return res.status(400).json({ success: false, message: 'Password is required.' });
         }
+
         const passwordHash = bcrypt.hashSync(password, 10);
 
+        // Check if the username already exists
+        let userWithSameUsername = await User.findOne({ username });
+
+        // If the username already exists, suggest an alternative
+        if (userWithSameUsername) {
+            let suggestedUsername;
+            let suffix = 1;
+
+            // Keep generating alternative usernames until a unique one is found
+            do {
+                suggestedUsername = generateSuggestedUsername(username, suffix);
+                userWithSameUsername = await User.findOne({ username: suggestedUsername });
+                suffix++;
+            } while (userWithSameUsername);
+
+            return res.status(400).json({
+                success: false,
+                message: `The username '${username}' is already taken. Consider using '${suggestedUsername}' or choose another.`,
+            });
+        }
 
         // Create a new user
         let user = new User({
@@ -227,7 +276,7 @@ router.post('/register', async (req, res) => {
             secretAnswer,
             accountType,
             // Coins and profit will be added automatically with default values
-            last_login_time: new Date(),  // Set initial login time
+            // last_login_time: new Date(),  // Set initial login time
         });
 
         // Save the user to the database
@@ -246,11 +295,9 @@ router.post('/register', async (req, res) => {
                 fullname: user.fullname,
                 username: user.username,
                 email: user.email,
-                coin_type: user.coin_type,
                 accountType: user.accountType,
-                coins: user.coins,
+                accountBalance: user.accountBalance,
                 profit: user.profit,
-                last_login_time: user.last_login_time,
             },
         });
     } catch (error) {
@@ -258,6 +305,68 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
+
+
+// router.post('/register', async (req, res) => {
+//     try {
+
+//         // Create a new user
+//         const {
+//             fullname,
+//             username,
+//             email,
+//             password,
+//             secretQuestion,
+//             secretAnswer,
+//             accountType,
+//          } = req.body;
+//         // Check if password is present
+//         if (!req.body.password) {
+//             return res.status(400).json({ success: false, message: 'Password is required.' });
+//         }
+//         const passwordHash = bcrypt.hashSync(password, 10);
+
+
+//         // Create a new user
+//         let user = new User({
+//             fullname,
+//             username,
+//             email,
+//             passwordHash,
+//             secretQuestion,
+//             secretAnswer,
+//             accountType,
+//             // Coins and profit will be added automatically with default values
+//             //last_login_time: new Date(),  // Set initial login time
+//         });
+
+//         // Save the user to the database
+//         user = await user.save();
+
+//         if (!user) {
+//             return res.status(400).json({ success: false, message: 'The user cannot be created!' });
+//         }
+
+//         // Respond with a 200 status code and the user data
+//         res.status(200).json({
+//             success: true,
+//             message: 'Registration successful',
+//             user: {
+//                 _id: user._id,
+//                 fullname: user.fullname,
+//                 username: user.username,
+//                 email: user.email,
+//                 accountType: user.accountType,
+//                 accountBalance: user.accountBalance,
+//                 profit: user.profit,
+//             },
+//         });
+//     } catch (error) {
+//         console.error('Error in registration:', error);
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
 
 
 // Route for upgrading user plan
@@ -287,21 +396,48 @@ router.post('/upgrade-plan/:id', async (req, res) => {
     }
 });
 
-// Route for manipulating user profit individually (protected for admins)
-router.put('/manipulate-user/:userId',  async (req, res) => {
-    try {
-        const { coins, profit } = req.body;
-        const userId = req.params.userId;
+// // Route for manipulating user profit individually (protected for admins)
+// router.put('/manipulate-user/:userId',  async (req, res) => {
+//     try {
+//         const { coins, profit } = req.body;
+//         const userId = req.params.userId;
 
-        // Find the user by ID
-        const user = await User.findById(userId);
+//         // Find the user by ID
+//         const user = await User.findById(userId);
+
+//         if (!user) {
+//             return res.status(404).json({ error: 'User not found' });
+//         }
+
+//         // Update the user's coins and profit
+//         user.coins = coins;
+//         user.profit = profit;
+
+//         // Save the updated user data to the database
+//         await user.save();
+
+//         res.status(200).json({ success: true, message: 'User details manipulated successfully' });
+//     } catch (error) {
+//         console.error('Error manipulating user details:', error);
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
+
+// Route for manipulating user profit individually by username (protected for admins)
+router.put('/manipulate-user/:username', async (req, res) => {
+    try {
+        const { amount, profit } = req.body;
+        const username = req.params.username;
+
+        // Find the user by username
+        const user = await User.findOne({ username });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Update the user's coins and profit
-        user.coins = coins;
+        // Update the user's amount and profit
+        user.accountBalance = amount;
         user.profit = profit;
 
         // Save the updated user data to the database
@@ -313,6 +449,7 @@ router.put('/manipulate-user/:userId',  async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
 
 // Other routes...
 

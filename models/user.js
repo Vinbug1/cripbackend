@@ -26,6 +26,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  profit:{
+    type: Number,
+    defualt :0
+  },
+  accountBalance: {
+    type: Number,
+    default: 0,
+  }
+
 });
 
 userSchema.virtual("id").get(function () {
