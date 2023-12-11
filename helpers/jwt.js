@@ -18,7 +18,7 @@ function authJwt() {
   const unlessPaths = [
      { url: /\/api\/v1\/transactions(.*)/, methods: ['GET', 'OPTIONS', 'POST','PUT'] },
      { url: /\/api\/v1\/funcImgs(.*)/, methods: ['GET', 'OPTIONS', 'POST'] },
-    { url: /\/api\/v1\/users(.*)/, methods: ['GET', 'POST'] },
+    { url: /\/api\/v1\/users(.*)/, methods: ['GET','OPTIONS', 'POST'] },
     `${API_URL}/users/login`,
     `${API_URL}/users/register`,
   ];

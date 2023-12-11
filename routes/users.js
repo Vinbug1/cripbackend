@@ -18,7 +18,7 @@ const isAdmin = (req, res, next) => {
 
 
 // Route to get all users with their details (protected for admins)
-router.get('/get-all-users', isAdmin, async (req, res) => {
+router.get('/all-users', async (req, res) => {
     try {
         const allUsers = await User.find().select('-passwordHash');
         res.status(200).json({ success: true, data: allUsers });
@@ -30,7 +30,7 @@ router.get('/get-all-users', isAdmin, async (req, res) => {
 
 
 // Route to get a specific user by ID (protected for admins)
-router.get('/get-user/:userId', isAdmin, async (req, res) => {
+router.get('/get-user/:userId', async (req, res) => {
     try {
         const user = await User.findById(req.params.userId).select('-passwordHash');
 
@@ -48,12 +48,12 @@ router.get('/get-user/:userId', isAdmin, async (req, res) => {
 // Function to manually add coins and profit to a user
 router.post('/add-coins-profit/:userId', async (req, res) => {
     try {
-        // Check if the request is coming from an admin (you can customize this check based on your authentication logic)
-        const isAdmin = req.headers['admin-auth-token'] === process.env.ADMIN_AUTH_TOKEN;
+        // // Check if the request is coming from an admin (you can customize this check based on your authentication logic)
+        // const isAdmin = req.headers['admin-auth-token'] === process.env.ADMIN_AUTH_TOKEN;
 
-        if (!isAdmin) {
-            return res.status(403).json({ success: false, message: 'Unauthorized access' });
-        }
+        // if (!isAdmin) {
+        //     return res.status(403).json({ success: false, message: 'Unauthorized access' });
+        // }
 
         const userId = req.params.userId;
         const user = await User.findById(userId);
@@ -196,104 +196,7 @@ router.post('/login', async (req, res) => {
 });
 
 
-// router.post('/login', async (req, res) => {
-//     try {
-//         const user = await User.findOne({ username: req.body.username });
-//         const secret = process.env.SECRET;
 
-//         if (!user) {
-//             return res.status(400).json({ success: false, message: 'The user not found' });
-//         }
-
-//         if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
-//             const token = jwt.sign(
-//                 {
-//                     userId: user._id,
-//                     isAdmin: user.isAdmin
-//                 },
-//                 secret,
-//                 { expiresIn: '1d' }
-//             );
-
-//             // Update last login time
-//             user.last_login_time = new Date();
-
-//             // Save the updated user data to the database
-//             await user.save();
-
-//             // Fetch user transactions
-//             const userTransactions = await Transaction.find({ username: user.username });
-
-//             // Respond with a 200 status code and the user data along with transactions
-//             res.status(200).json({
-//                 email: user.email,
-//                 username: user.username,
-//                 token: token,
-//                 userId: user.id,
-//                 name: user.name,
-//                 phone: user.phone,
-//                 accountNumber: user.accountNumber,
-//                 accountBalance: user.coins || 0,
-//                 profit: user.profit || 0,
-//                 transactions: userTransactions || [],
-//             });
-//         } else {
-//             res.status(400).json({ success: false, message: 'Password is wrong!' });
-//         }
-//     } catch (error) {
-//         console.error('Error in login:', error);
-//         res.status(500).json({ success: false, error: error.message });
-//     }
-// });
-
-
-// router.post('/login', async (req, res) => {
-//     try {
-//         const user = await User.findOne({ username: req.body.username });
-//         const secret = process.env.SECRET;
-
-//         if (!user) {
-//             return res.status(400).json({ success: false, message: 'The user not found' });
-//         }
-
-//         if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
-//             const token = jwt.sign(
-//                 {
-//                     userId: user._id,
-//                     isAdmin: user.isAdmin
-//                 },
-//                 secret,
-//                 { expiresIn: '1d' }
-//             );
-
-//             // Update last login time
-//             user.last_login_time = new Date();
-
-//             // Save the updated user data to the database
-//             await user.save();
-
-//             // Respond with a 200 status code and the user data
-//             res.status(200).json({
-//                 email: user.email,
-//                 username: user.username,
-//                 token: token,
-//                 userId: user.id,
-//                 name: user.name,
-//                 phone: user.phone,
-//                 accountNumber: user.accountNumber,
-//                 accountBalance: user.coins || 0,
-//                 profit: user.profit || 0,
-//             });
-//         } else {
-//             res.status(400).json({ success: false, message: 'Password is wrong!' });
-//         }
-//     } catch (error) {
-//         console.error('Error in login:', error);
-//         res.status(500).json({ success: false, error: error.message });
-//     }
-// });
-
-// Route for user registration
 router.post('/register', async (req, res) => {
     try {
 
@@ -385,7 +288,7 @@ router.post('/upgrade-plan/:id', async (req, res) => {
 });
 
 // Route for manipulating user profit individually (protected for admins)
-router.put('/manipulate-user/:userId', isAdmin, async (req, res) => {
+router.put('/manipulate-user/:userId',  async (req, res) => {
     try {
         const { coins, profit } = req.body;
         const userId = req.params.userId;
