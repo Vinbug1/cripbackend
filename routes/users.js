@@ -63,59 +63,6 @@ router.get('/get-user/:username', async (req, res) => {
 });
 
 
-                                
-
-// // Function to manually edit and reduce coins and profit of a user
-// router.put('/edit-coins-profit/:userId', async (req, res) => {
-//     try {
-//         // Check if the request is coming from an admin (you can customize this check based on your authentication logic)
-//         const isAdmin = req.headers['admin-auth-token'] === process.env.ADMIN_AUTH_TOKEN;
-
-//         if (!isAdmin) {
-//             return res.status(403).json({ success: false, message: 'Unauthorized access' });
-//         }
-
-//         const userId = req.params.userId;
-//         const user = await User.findById(userId);
-
-//         if (!user) {
-//             return res.status(404).json({ success: false, message: 'User not found' });
-//         }
-
-//         const { coinsToEdit, profitToEdit } = req.body;
-
-//         // Validate that coinsToEdit and profitToEdit are numbers
-//         if (isNaN(coinsToEdit) || isNaN(profitToEdit)) {
-//             return res.status(400).json({ success: false, message: 'Invalid input. Coins and profit must be numbers.' });
-//         }
-
-//         // Ensure that the admin does not reduce coins or profit below zero
-//         if (user.coins - coinsToEdit < 0 || user.profit - profitToEdit < 0) {
-//             return res.status(400).json({ success: false, message: 'Coins or profit cannot be reduced below zero.' });
-//         }
-
-//         // Edit and reduce coins and profit of the user
-//         user.coins -= parseInt(coinsToEdit);
-//         user.profit -= parseInt(profitToEdit);
-
-//         // Save the updated user data to the database
-//         await user.save();
-
-//         res.status(200).json({
-//             success: true,
-//             message: 'Coins and profit edited successfully',
-//             updatedUser: {
-//                 email: user.email,
-//                 username: user.username,
-//                 accountBalance: user.coins || 0,
-//                 profit: user.profit || 0,
-//             },
-//         });
-//     } catch (error) {
-//         console.error('Error editing coins and profit:', error);
-//         res.status(500).json({ success: false, error: error.message });
-//     }
-// });
 
 // Function to manually edit and reduce coins and profit of a user by username (protected for admins)
 router.put('/edit-coins-profit/:username', async (req, res) => {
@@ -169,7 +116,6 @@ router.put('/edit-coins-profit/:username', async (req, res) => {
     }
 });
 
-
 router.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ username: req.body.username });
@@ -220,7 +166,6 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-
 
 const generateSuggestedUsername = (baseUsername, suffix) => {
     return `${baseUsername}_${suffix}`;
@@ -307,7 +252,6 @@ router.post('/register', async (req, res) => {
 });
 
 
-
 // router.post('/register', async (req, res) => {
 //     try {
 
@@ -370,6 +314,9 @@ router.post('/register', async (req, res) => {
 
 
 // Route for upgrading user plan
+
+
+
 router.post('/upgrade-plan/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -396,32 +343,7 @@ router.post('/upgrade-plan/:id', async (req, res) => {
     }
 });
 
-// // Route for manipulating user profit individually (protected for admins)
-// router.put('/manipulate-user/:userId',  async (req, res) => {
-//     try {
-//         const { coins, profit } = req.body;
-//         const userId = req.params.userId;
 
-//         // Find the user by ID
-//         const user = await User.findById(userId);
-
-//         if (!user) {
-//             return res.status(404).json({ error: 'User not found' });
-//         }
-
-//         // Update the user's coins and profit
-//         user.coins = coins;
-//         user.profit = profit;
-
-//         // Save the updated user data to the database
-//         await user.save();
-
-//         res.status(200).json({ success: true, message: 'User details manipulated successfully' });
-//     } catch (error) {
-//         console.error('Error manipulating user details:', error);
-//         res.status(500).json({ success: false, error: error.message });
-//     }
-// });
 
 // Route for manipulating user profit individually by username (protected for admins)
 router.put('/manipulate-user/:username', async (req, res) => {
@@ -456,7 +378,21 @@ router.put('/manipulate-user/:username', async (req, res) => {
 module.exports = router;
 
 
-
+//  const workingTest =(str) => {
+//     if (str === "btn1") {
+//         return "btn1";
+        
+//     }else if (str === "btn2") {
+//         return "btn2";
+        
+//     }else if (str === "btn3") {
+//         return "btn3";
+        
+//     }else if (str === "btn4") {
+//         return "btn4";
+        
+//     }
+//  }
 
 
 

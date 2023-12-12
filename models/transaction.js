@@ -7,19 +7,11 @@ const transactionSchema = new mongoose.Schema({
     },
     profit: {
         type: Number,
-        required: true,
+        default: 0,
     },
     amount:{
         type: Number,
-        required: true,
-    },
-    account:{
-        type: String,
-        required: true,
-    },
-    type:{
-        type: String,
-        required: true,
+        default: 0,
     }
 });
 

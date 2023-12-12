@@ -7,7 +7,7 @@ const {User} = require('../models/user');
 // Create a new transaction
 router.post('/trans', async (req, res) => {
     try {
-        const { username, profit, amount, account, type} = req.body;
+        const { username, profit, amount } = req.body;
 
         // Fetch the user by username
         const existingUser = await User.findOne({ username });
@@ -15,26 +15,27 @@ router.post('/trans', async (req, res) => {
         if (!existingUser) {
             return res.status(404).json({ error: 'User not found' });
         }
+             existingUser.accountBalance += amount;
+             existingUser.profit += profit;
 
-        // Update the user's account balance and profit
-        existingUser.accountBalance += amount;
-        existingUser.profit += amount;
+        // Create a new transaction using the Transaction model
+        const newTransaction = new Transaction({
+            username,
+            profit,
+            amount,
+        });
 
-        // Save the updated user
-        const updatedUser = await existingUser.save();
-
-        // Create a new transaction
-        const newTransaction = new Transaction({ username, profit, amount, account,type });
+        // Save the transaction to the database
         const savedTransaction = await newTransaction.save();
 
-        res.status(200).json({ user: updatedUser, transaction: savedTransaction });
+        res.status(201).json(savedTransaction);
     } catch (error) {
-        console.error('Error creating transaction:', error);
+        console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-// Get all transactions for a specific user
+
 router.get('/trans/:username', async (req, res) => {
     try {
         const username = req.params.username;
@@ -62,7 +63,7 @@ router.get('/trans/:username', async (req, res) => {
 // Update user profit and account balance
 router.put('/balance/:username', async (req, res) => {
     try {
-        const { profit, accountBalance } = req.body;
+        const { profit, amount } = req.body;
         const username = req.params.username;
 
         // Find the user by username
