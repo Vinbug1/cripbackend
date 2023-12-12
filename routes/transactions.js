@@ -34,6 +34,25 @@ router.post('/trans', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+router.get('/trans/all', async (req, res) => {
+    try {
+        // Fetch all transactions without specifying a specific user
+        const allTransactions = await Transaction.find().populate({
+            path: 'username',
+            select: 'fullname username email', // Include the specific fields you want
+        });
+
+        if (!allTransactions || allTransactions.length === 0) {
+            return res.status(404).json({ error: 'No transactions found' });
+        }
+
+        res.status(200).json(allTransactions);
+    } catch (error) {
+        console.error('Error fetching all transactions:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 
 router.get('/trans/:username', async (req, res) => {
