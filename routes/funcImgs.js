@@ -254,41 +254,80 @@ router.post('/upload-image', upload.single('image'), async (req, res) => {
 //   });
 
 // Get all images with their URLs
+// router.get('/getimages', async (req, res) => {
+//     try {
+//         const funcImgs = await FuncImg.find();
+
+//         const imagesWithUrls = await Promise.all(funcImgs.map(async (funcImg) => {
+//             const imageFilename = funcImg.image;
+            
+//             // Check if funcImg.path is defined before processing
+//             const gcsPath = funcImg.path ? funcImg.path.replace(/^gs:\/\/(.*?)\//, '') : '';
+            
+//             console.log('gcsPath:', gcsPath); // Log the gcsPath for debugging
+            
+//             if (gcsPath) {
+//                 const imageFile = bucket.file(gcsPath);
+//                 const imageUrl = await imageFile.getSignedUrl({ action: 'read', expires: '01-01-2030' });
+
+//                 return {
+//                     image: funcImg.toObject(),
+//                     imageUrl: imageUrl[0],
+//                 };
+//             } else {
+//                 console.warn('Image path is empty or undefined:', funcImg);
+//                 return null;
+//             }
+//         }));
+
+//         // Filter out null values (images with empty or undefined paths)
+//         const filteredImagesWithUrls = imagesWithUrls.filter(item => item !== null);
+
+//         res.status(200).json({ images: filteredImagesWithUrls });
+//     } catch (error) {
+//         console.error('Error getting all images:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+
 router.get('/getimages', async (req, res) => {
-    try {
-        const funcImgs = await FuncImg.find();
+  try {
+      const funcImgs = await FuncImg.find();
 
-        const imagesWithUrls = await Promise.all(funcImgs.map(async (funcImg) => {
-            const imageFilename = funcImg.image;
-            
-            // Check if funcImg.path is defined before processing
-            const gcsPath = funcImg.path ? funcImg.path.replace(/^gs:\/\/(.*?)\//, '') : '';
-            
-            console.log('gcsPath:', gcsPath); // Log the gcsPath for debugging
-            
-            if (gcsPath) {
-                const imageFile = bucket.file(gcsPath);
-                const imageUrl = await imageFile.getSignedUrl({ action: 'read', expires: '01-01-2030' });
+      const imagesWithUrls = await Promise.all(funcImgs.map(async (funcImg) => {
+          const imageFilename = funcImg.image;
 
-                return {
-                    image: funcImg.toObject(),
-                    imageUrl: imageUrl[0],
-                };
-            } else {
-                console.warn('Image path is empty or undefined:', funcImg);
-                return null;
-            }
-        }));
+          // Check if funcImg.path is defined before processing
+          const gcsPath = funcImg.path ? funcImg.path.replace(/^gs:\/\/(.*?)\//, '') : '';
 
-        // Filter out null values (images with empty or undefined paths)
-        const filteredImagesWithUrls = imagesWithUrls.filter(item => item !== null);
+          console.log('gcsPath:', gcsPath); // Log the gcsPath for debugging
 
-        res.status(200).json({ images: filteredImagesWithUrls });
-    } catch (error) {
-        console.error('Error getting all images:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+          if (gcsPath) {
+              const imageFile = bucket.file(gcsPath);
+              const imageUrl = await imageFile.getSignedUrl({ action: 'read', expires: '01-01-2030' });
+
+              return {
+                  username: funcImg.username,
+                  image: funcImg.toObject(),
+                  imageUrl: imageUrl[0],
+              };
+          } else {
+              console.warn('Image path is empty or undefined:', funcImg);
+              return null;
+          }
+      }));
+
+      // Filter out null values (images with empty or undefined paths)
+      const filteredImagesWithUrls = imagesWithUrls.filter(item => item !== null);
+
+      res.status(200).json({ images: filteredImagesWithUrls });
+  } catch (error) {
+      console.error('Error getting all images:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
+
+
 
   
 // router.get('/getimages', async (req, res) => {
