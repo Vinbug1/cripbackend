@@ -109,38 +109,72 @@ function generateRandomString(length) {
 }
 
 router.post('/upload-image', upload.single('image'), async (req, res) => {
-    let fileStream; // Declare fileStream outside the try block
-    try {
+  let fileStream; // Declare fileStream outside the try block
+  try {
+    const { username } = req.body; 
       const bucket = admin.storage().bucket();
-  
       const imageBuffer = req.file.buffer;
       const uniqueFileName = `${Date.now()}-${req.file.originalname}`;
       const file = bucket.file(uniqueFileName);
       fileStream = file.createWriteStream();
-  
+
       fileStream.on('error', (err) => {
-        console.error(err);
-        res.status(500).json({ message: 'Error uploading image' });
+          console.error(err);
+          res.status(500).json({ message: 'Error uploading image' });
       });
-  
+
       fileStream.on('finish', async () => {
-        const imagePath = `gs://${bucket.name}/${uniqueFileName}`;
-        const newImage = new FuncImg({ image: uniqueFileName, path: imagePath });
-        await newImage.save();
-  
-        // Include the imagePath in the response
-        res.status(200).json({ message: 'Image uploaded successfully', imagePath });
+          const imagePath = `gs://${bucket.name}/${uniqueFileName}`;
+          const newImage = new FuncImg({ username, image: uniqueFileName, path: imagePath });
+          await newImage.save();
+
+          // Include the imagePath in the response
+          res.status(200).json({ message: 'Image uploaded successfully', imagePath });
       });
-  
+
       fileStream.end(imageBuffer);
-    } catch (error) {
+  } catch (error) {
       console.error(error);
       if (fileStream) {
-        fileStream.end(); // Close the fileStream if an error occurs
+          fileStream.end(); // Close the fileStream if an error occurs
       }
       res.status(500).json({ message: 'Error uploading image' });
-    }
-  });
+  }
+});
+
+// router.post('/upload-image', upload.single('image'), async (req, res) => {
+//     let fileStream; // Declare fileStream outside the try block
+//     try {
+//       const bucket = admin.storage().bucket();
+  
+//       const imageBuffer = req.file.buffer;
+//       const uniqueFileName = `${Date.now()}-${req.file.originalname}`;
+//       const file = bucket.file(uniqueFileName);
+//       fileStream = file.createWriteStream();
+  
+//       fileStream.on('error', (err) => {
+//         console.error(err);
+//         res.status(500).json({ message: 'Error uploading image' });
+//       });
+  
+//       fileStream.on('finish', async () => {
+//         const imagePath = `gs://${bucket.name}/${uniqueFileName}`;
+//         const newImage = new FuncImg({username, image: uniqueFileName, path: imagePath });
+//         await newImage.save();
+  
+//         // Include the imagePath in the response
+//         res.status(200).json({ message: 'Image uploaded successfully', imagePath });
+//       });
+  
+//       fileStream.end(imageBuffer);
+//     } catch (error) {
+//       console.error(error);
+//       if (fileStream) {
+//         fileStream.end(); // Close the fileStream if an error occurs
+//       }
+//       res.status(500).json({ message: 'Error uploading image' });
+//     }
+//   });
   
 
 // router.post('/upload-image', upload.single('image'), async (req, res) => {
